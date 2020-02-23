@@ -1,6 +1,6 @@
-# goplayground
+# Go Playground
 
-A new Flutter project.
+Code Go on the go.
 
 ## Getting Started
 
