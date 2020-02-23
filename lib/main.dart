@@ -12,21 +12,14 @@ class MyApp extends StatelessWidget {
         appBar: new AppBar(
           title: Text('The Go Playground'),
           actions: <Widget>[
-            IconButton(icon: Icon(Icons.info_outline), onPressed: null),
+            Tooltip(
+                message: 'About',
+                child: IconButton(
+                    icon: Icon(Icons.info_outline), onPressed: about())),
           ],
         ),
-        bottomNavigationBar: new BottomAppBar(
-          child: new ButtonBar(
-            alignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              RaisedButton(child: Text("Run"), onPressed: null),
-              RaisedButton(child: Text("Format"), onPressed: null),
-              RaisedButton(child: Text("Imports"), onPressed: null),
-              RaisedButton(child: Text("Share"), onPressed: null),
-            ],
-          ),
-        ),
         body: goBody(),
+        bottomNavigationBar: goBar(),
       ),
       theme: new ThemeData.dark(),
     );
@@ -63,8 +56,53 @@ Widget goBody() {
   );
 }
 
+Widget goBar() {
+  return new BottomAppBar(
+    child: new ButtonBar(
+      alignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Tooltip(
+            message: 'Run',
+            child: IconButton(
+                icon: Icon(Icons.play_circle_outline), onPressed: run())),
+        Tooltip(
+            message: 'Format',
+            child:
+                IconButton(icon: Icon(Icons.text_format), onPressed: format())),
+        Tooltip(
+            message: 'Imports',
+            child: IconButton(
+                icon: Icon(Icons.import_export), onPressed: imports())),
+        Tooltip(
+            message: 'Share',
+            child: IconButton(icon: Icon(Icons.share), onPressed: share())),
+      ],
+    ),
+  );
+}
+
 TextStyle code() {
   return TextStyle(
     fontSize: 18,
   );
+}
+
+Function about() {
+  return null;
+}
+
+Function run() {
+  return null;
+}
+
+Function format() {
+  return null;
+}
+
+Function imports() {
+  return null;
+}
+
+Function share() {
+  return null;
 }
