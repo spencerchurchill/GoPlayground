@@ -1,4 +1,4 @@
-package com.example.goplayground
+package com.peak.goplayground
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
