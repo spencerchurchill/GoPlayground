@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -11,14 +13,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyApp extends State<MyApp> {
+  // Text in code input TextFormField
   String codeText =
-      'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Hello, playground")\n}';
+      'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Hello, playground")\n}\n';
+  // Text returned from Go program
   String returnText = '';
-  String sender = '';
+  // Additional text returned from server
+  String sysText = '';
+  // POST response text
   String rsp = '';
+  // About RichText display
   bool vis = false;
-  final iconSize = 28.0;
-  final codeKey = GlobalKey<FormFieldState>();
+  // Disable button function while POST request awaits
+  bool buttonUse = true;
+  // Controller to validate and edit text in code input TextFormField
   final TextEditingController codeInput = new TextEditingController();
 
   @override
@@ -40,7 +48,7 @@ class _MyApp extends State<MyApp> {
             Tooltip(message: 'About', child: aboutIcon()),
           ],
           bottom: PreferredSize(
-              preferredSize: Size.fromHeight(iconSize + 16.0), child: goBar()),
+              preferredSize: Size.fromHeight(40.0), child: goBar()),
           pinned: true,
           floating: true,
           snap: true,
@@ -51,7 +59,7 @@ class _MyApp extends State<MyApp> {
     );
   }
 
-// Navigation bar
+  // Navigation bar
   BottomAppBar goBar() {
     return new BottomAppBar(
       child: new ButtonBar(
@@ -69,39 +77,11 @@ class _MyApp extends State<MyApp> {
     return new SliverChildListDelegate([
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: TextFormField(
-          key: codeKey,
-          controller: codeInput,
-          toolbarOptions: ToolbarOptions(
-            copy: true,
-            cut: false,
-            paste: true,
-            selectAll: false,
-          ),
-          keyboardType: TextInputType.multiline,
-          autocorrect: false,
-          minLines: 9,
-          maxLines: null,
-          validator: (value) {
-            if (value.isEmpty) {
-              return 'Go code!';
-            }
-            makeRequest(value);
-            return null;
-          },
-          onChanged: (text) {
-            codeText = codeInput.text;
-          },
-        ),
+        child: codeTextBox(),
       ),
       Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Align(
-            alignment: Alignment.topLeft,
-            child: SelectableText(
-              // Go output
-              '$returnText',
-            )),
+        child: returnCard(),
       ),
       Visibility(
         child: aboutPlayground(),
@@ -110,167 +90,228 @@ class _MyApp extends State<MyApp> {
     ]);
   }
 
-  Widget aboutIcon() {
+  TextFormField codeTextBox() {
+    return new TextFormField(
+      controller: codeInput,
+      toolbarOptions: ToolbarOptions(
+        copy: true,
+        cut: false,
+        paste: true,
+        selectAll: false,
+      ),
+      keyboardType: TextInputType.multiline,
+      autocorrect: false,
+      minLines: 10,
+      maxLines: null,
+      style: codeStyle(),
+      onChanged: (text) {
+        codeText = codeInput.text;
+      },
+    );
+  }
+
+  Card returnCard() {
+    return new Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SelectableText(
+              // Go output
+              '$returnText',
+              style: codeStyle(),
+            ),
+            SelectableText(
+              // Go output
+              '$sysText',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  TextStyle codeStyle() {
+    return TextStyle(fontSize: 18.0);
+  }
+
+  GestureDetector aboutIcon() {
     return GestureDetector(
         onTap: () {
           setVisibility(vis);
         },
-        child: Icon(Icons.info_outline, size: iconSize));
+        child: Icon(Icons.info_outline));
   }
 
-  Widget runIcon() {
+  GestureDetector runIcon() {
     return GestureDetector(
         onTap: () {
-          sender = 'run';
-          codeKey.currentState.validate();
+          if (buttonUse) {
+            makeRequest('run', codeInput.text);
+          }
+          return null;
         },
-        child: Icon(Icons.play_circle_outline,
-            color: Colors.green, size: iconSize));
+        child: Icon(Icons.play_circle_outline, color: Colors.green));
   }
 
-  Widget formatIcon() {
+  GestureDetector formatIcon() {
     return GestureDetector(
         onTap: () {
-          sender = 'format';
-          codeKey.currentState.validate();
+          if (buttonUse) {
+            makeRequest('format', codeInput.text);
+          }
+          return null;
         },
         child: Icon(
           Icons.text_format,
-          size: iconSize,
         ));
   }
 
-  Widget shareIcon() {
+  GestureDetector shareIcon() {
     return GestureDetector(
         onTap: () {
-          sender = 'share';
-          codeKey.currentState.validate();
+          if (buttonUse) {
+            makeRequest('share', codeInput.text);
+          }
+          return null;
         },
         child: Icon(
           Icons.share,
-          size: iconSize,
         ));
   }
 
-  void makeRequest(String value) {
-    switch (sender) {
-      case 'run':
-        runPostRequest(value);
-        break;
-      case 'format':
-        formatPostRequest(value);
-        break;
-      case 'share':
-        sharePostRequest(value);
-        break;
-      default:
-        break;
-    }
+  RichText aboutPlayground() {
+    return new RichText(
+      text: TextSpan(
+        text: 'About the Playground',
+        style: TextStyle(fontWeight: FontWeight.bold),
+        children: <TextSpan>[
+          TextSpan(
+              text:
+                  '\n\nThe Go Playground is a web service that runs on golang.org\'s servers. The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.\n\nIf the program contains tests or examples and no main function, the service runs the tests. Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.\n\nGopher image by Renee French, licensed under (Creative Commons 3.0 Attributions license)[https://creativecommons.org/licenses/by/3.0/].',
+              style: TextStyle(fontWeight: FontWeight.normal))
+        ],
+      ),
+    );
   }
 
-// POST REQUEST //
-  changeText(String rsp) {}
-  Future runPostRequest(String code) async {
-    // make POST request
-    Response response = await post(
-        'https://play.golang.org/compile?version=2&body=' +
-            Uri.encodeFull(code) +
-            '&withVet=true');
-
-    String rsp;
-
-    // check the status code for the result
-    int statusCode = response.statusCode;
-
-    // this API passes back the id of the new item added to the body
-    if (statusCode == 200) {
-      Map<String, dynamic> map = jsonDecode(response.body);
-
-      if (map['Errors'] == '') {
-        rsp = map['Events'][0]['Message'];
-      } else {
-        rsp = map['Errors'];
-      }
-    } else {
-      rsp = null;
-    }
-    // Update output textfield
-    updateText(rsp, 'output');
-  }
-
-  Future formatPostRequest(String code) async {
-    Response response = await post('https://play.golang.org/fmt?body=' +
-        Uri.encodeFull(code) +
-        '&imports=true');
-    String rsp;
-    int statusCode = response.statusCode;
-    if (statusCode == 200) {
-      Map<String, dynamic> map = jsonDecode(response.body);
-      if (map['Error'] == '') {
-        rsp = map['Body'];
-      } else {
-        rsp = map['Errors'];
-      }
-    } else {
-      rsp = null;
-    }
-    // Update code textfield
-    updateText(rsp, 'input');
-  }
-
-  Future sharePostRequest(String code) async {
-    Response response =
-        await post('https://play.golang.org/share?' + Uri.encodeFull(code));
-    String rsp;
-    int statusCode = response.statusCode;
-    if (statusCode == 200) {
-      rsp = 'https://play.golang.org/p/' + response.body;
-    } else {
-      rsp = null;
-    }
-    // Copy rsp to keyboard
-    Clipboard.setData(new ClipboardData(text: rsp));
-  }
-
-  updateText(String rsp, String loc) {
-    setState(() {
-      if (loc == 'input') {
-        if (rsp != null) {
-          codeText = rsp;
-        }
-      } else if (loc == 'output') {
-        returnText = rsp;
-      }
-    });
-  }
-
-  setVisibility(bool visLoc) {
+  void setVisibility(bool visLoc) {
     setState(() {
       vis = !visLoc;
     });
   }
 
-  Widget aboutPlayground() {
-    return new Center(
-      child: new Card(
-        margin: EdgeInsets.all(16.0),
-        elevation: 8.0,
-        child: new Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: new RichText(
-            text: TextSpan(
-              text: 'About the Playground',
-              style: TextStyle(fontWeight: FontWeight.bold),
-              children: <TextSpan>[
-                TextSpan(
-                    text:
-                        '\n\nThe Go Playground is a web service that runs on golang.org\'s servers. The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.\n\nIf the program contains tests or examples and no main function, the service runs the tests. Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.',
-                    style: TextStyle(fontWeight: FontWeight.normal))
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+  void makeRequest(String sender, String value) {
+    if (value != '') {
+      buttonUse = false;
+      rsp = null;
+      // Button invoked
+      switch (sender) {
+        case 'run':
+          runPostRequest(value);
+          break;
+        case 'format':
+          formatPostRequest(value);
+          break;
+        case 'share':
+          sharePostRequest(value);
+          break;
+        default:
+          break;
+      }
+    } else {
+      updateText('Go code!', '', 'output');
+    }
+  }
+
+// POST REQUESTS //
+  Future runPostRequest(String code) async {
+    // make POST request
+    try {
+      Response response = await post(
+          'https://play.golang.org/compile?version=2&body=' +
+              Uri.encodeFull(code) +
+              '&withVet=true');
+
+      // check the status code for the result
+      int statusCode = response.statusCode;
+
+      // this API passes back the id of the new item added to the body
+      if (statusCode == 200) {
+        Map<String, dynamic> map = jsonDecode(response.body);
+
+        if (map['Errors'] == '') {
+          rsp = map['Events'][0]['Message'];
+          sysText = '\Program exited.';
+        } else {
+          rsp = map['Errors'];
+          sysText = '\nGo build failed.';
+        }
+      }
+    } on SocketException catch (_) {
+      sysText = 'Network error occurred.';
+    }
+    // Update output textfield
+    updateText(rsp, sysText, 'output');
+  }
+
+  Future formatPostRequest(String code) async {
+    try {
+      Response response = await post('https://play.golang.org/fmt?body=' +
+          Uri.encodeFull(code) +
+          '&imports=true');
+      int statusCode = response.statusCode;
+      if (statusCode == 200) {
+        Map<String, dynamic> map = jsonDecode(response.body);
+        if (map['Error'] == '') {
+          rsp = map['Body'];
+        } else {
+          rsp = map['Errors'];
+        }
+      }
+    } on SocketException catch (_) {
+      sysText = '\nNetwork error occurred.';
+    }
+    // Update code textfield
+    updateText(rsp, sysText, 'input');
+  }
+
+  Future sharePostRequest(String code) async {
+    try {
+      Response response =
+          await post('https://play.golang.org/share?' + Uri.encodeFull(code));
+      int statusCode = response.statusCode;
+      if (statusCode == 200) {
+        sysText = 'https://play.golang.org/p/' + response.body;
+      }
+      // Copy rsp to keyboard
+      rsp = 'Copied to clipboard\n';
+      Clipboard.setData(new ClipboardData(text: sysText));
+    } on SocketException catch (_) {
+      rsp = '';
+      sysText = '\nNetwork error occurred.';
+    }
+
+    updateText(rsp, sysText, 'output');
+  }
+
+  void updateText(String rsp, String fT, String loc) {
+    setState(() {
+      if (loc == 'input') {
+        if (rsp != null) {
+          codeText = rsp;
+        } else {
+          sysText = fT;
+        }
+      } else if (loc == 'output') {
+        if (rsp != null) {
+          returnText = rsp;
+        }
+        sysText = fT;
+      }
+      buttonUse = true;
+    });
   }
 }
