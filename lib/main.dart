@@ -250,8 +250,9 @@ class _MyApp extends State<MyApp> {
           sysText = '\nGo build failed.';
         }
       }
-    } on SocketException catch (_) {
-      sysText = 'Network error occurred.';
+    } on Exception catch (e) {
+      rsp = 'Network error occurred.\n';
+      sysText = e.toString();
     }
     // Update output textfield
     updateText(rsp, sysText, 'output');
@@ -271,8 +272,9 @@ class _MyApp extends State<MyApp> {
           rsp = map['Errors'];
         }
       }
-    } on SocketException catch (_) {
-      sysText = '\nNetwork error occurred.';
+    } on Exception catch (e) {
+      rsp = 'Network error occurred.\n';
+      sysText = e.toString();
     }
     // Update code textfield
     updateText(rsp, sysText, 'input');
@@ -289,11 +291,10 @@ class _MyApp extends State<MyApp> {
       // Copy rsp to keyboard
       rsp = 'Copied to clipboard\n';
       Clipboard.setData(new ClipboardData(text: sysText));
-    } on SocketException catch (_) {
-      rsp = '';
-      sysText = '\nNetwork error occurred.';
+    } on Exception catch (e) {
+      rsp = 'Network error occurred.\n';
+      sysText = e.toString();
     }
-
     updateText(rsp, sysText, 'output');
   }
 
