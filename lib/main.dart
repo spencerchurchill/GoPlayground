@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
@@ -238,6 +236,7 @@ class _MyApp extends State<MyApp> {
   }
 
   Future formatPostRequest(String code) async {
+    String placement;
     try {
       Response response = await post('https://play.golang.org/fmt?body=' +
           Uri.encodeFull(code) +
@@ -250,13 +249,15 @@ class _MyApp extends State<MyApp> {
         } else {
           rsp = map['Errors'];
         }
+        placement = 'input';
       }
     } on Exception catch (e) {
       rsp = 'Network error occurred.\n';
       sysText = e.toString();
+      placement = 'output';
     }
     // Update code textfield
-    updateText(rsp, sysText, 'input');
+    updateText(rsp, sysText, placement);
   }
 
   Future sharePostRequest(String code) async {
