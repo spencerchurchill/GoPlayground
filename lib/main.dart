@@ -179,7 +179,9 @@ class _MyApp extends State<MyApp> {
 
   void makeRequest(String sender, String value) {
     // Hide keyboard on button press
+
     FocusScope.of(context).unfocus();
+    updateText(null, null, 'load');
     if (value != '') {
       buttonUse = false;
       rsp = null;
@@ -285,16 +287,16 @@ class _MyApp extends State<MyApp> {
       if (loc == 'input') {
         if (rsp != null) {
           codeText = rsp;
-        } else {
-          sysText = fT;
         }
+        sysText = fT;
+        returnText = '';
       } else if (loc == 'output') {
         if (rsp != null) {
           returnText = rsp;
         }
         sysText = fT;
       } else if (loc == 'load') {
-        sysText = 'Waiting for remote server...';
+        returnText = 'Waiting for remote server...';
         sysText = '';
       }
       buttonUse = true;
