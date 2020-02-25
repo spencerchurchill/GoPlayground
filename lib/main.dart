@@ -178,6 +178,8 @@ class _MyApp extends State<MyApp> {
   }
 
   void makeRequest(String sender, String value) {
+    // Hide keyboard on button press
+    FocusScope.of(context).unfocus();
     if (value != '') {
       buttonUse = false;
       rsp = null;
@@ -221,7 +223,7 @@ class _MyApp extends State<MyApp> {
 
         if (map['Errors'] == '') {
           rsp = map['Events'][0]['Message'];
-          sysText = '\Program exited.';
+          sysText = '\nProgram exited.';
         } else {
           rsp = map['Errors'];
           sysText = '\nGo build failed.';
@@ -229,7 +231,7 @@ class _MyApp extends State<MyApp> {
       }
     } on Exception catch (e) {
       rsp = 'Network error occurred.\n';
-      sysText = e.toString();
+      sysText = '\n' + e.toString();
     }
     // Update output textfield
     updateText(rsp, sysText, 'output');
@@ -253,7 +255,7 @@ class _MyApp extends State<MyApp> {
       }
     } on Exception catch (e) {
       rsp = 'Network error occurred.\n';
-      sysText = e.toString();
+      sysText = '\n' + e.toString();
       placement = 'output';
     }
     // Update code textfield
@@ -273,7 +275,7 @@ class _MyApp extends State<MyApp> {
       Clipboard.setData(new ClipboardData(text: sysText));
     } on Exception catch (e) {
       rsp = 'Network error occurred.\n';
-      sysText = e.toString();
+      sysText = '\n' + e.toString();
     }
     updateText(rsp, sysText, 'output');
   }
