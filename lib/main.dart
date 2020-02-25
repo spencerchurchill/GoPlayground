@@ -293,6 +293,9 @@ class _MyApp extends State<MyApp> {
           returnText = rsp;
         }
         sysText = fT;
+      } else if (loc == 'load') {
+        sysText = 'Waiting for remote server...';
+        sysText = '';
       }
       buttonUse = true;
     });
