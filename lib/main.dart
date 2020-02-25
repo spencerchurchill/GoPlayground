@@ -132,6 +132,8 @@ class _MyApp extends State<MyApp> {
     return TextStyle(fontSize: 18.0);
   }
 
+  // TOUCHABLE ICONS //
+
   GestureDetector aboutIcon() {
     return GestureDetector(
         onTap: () {
