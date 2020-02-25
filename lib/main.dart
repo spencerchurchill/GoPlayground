@@ -37,7 +37,7 @@ class _MyApp extends State<MyApp> {
           // SliverAppBar
           body: CustomScrollView(slivers: <Widget>[
         SliverAppBar(
-          expandedHeight: 150,
+          expandedHeight: 150.0,
           flexibleSpace: FlexibleSpaceBar(
               background: FittedBox(
             child: Image.asset('assets/images/gophers.jpg'),
