@@ -22,12 +22,13 @@ class _MyApp extends State<MyApp> {
   String sysText = '';
   // POST response text
   String rsp = '';
-  // About RichText display
-  bool vis = false;
   // Disable button function while POST request awaits
   bool buttonUse = true;
   // Controller to validate and edit text in code input TextFormField
   final TextEditingController codeInput = new TextEditingController();
+  // About the Go Playground text
+  final String aboutText =
+      'The Go Playground is a web service that runs on golang.org\'s servers. The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.\n\nIf the program contains tests or examples and no main function, the service runs the tests. Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.\n\nGopher image by Renee French, licensed under (Creative Commons 3.0 Attributions license)[https://creativecommons.org/licenses/by/3.0/].';
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +84,6 @@ class _MyApp extends State<MyApp> {
         padding: const EdgeInsets.all(16.0),
         child: returnCard(),
       ),
-      Visibility(
-        child: aboutPlayground(),
-        visible: vis,
-      ),
     ]);
   }
 
@@ -140,7 +137,7 @@ class _MyApp extends State<MyApp> {
   GestureDetector aboutIcon() {
     return GestureDetector(
         onTap: () {
-          setVisibility(vis);
+          makeRequest('about', aboutText);
         },
         child: Icon(Icons.info_outline));
   }
@@ -182,27 +179,6 @@ class _MyApp extends State<MyApp> {
         ));
   }
 
-  RichText aboutPlayground() {
-    return new RichText(
-      text: TextSpan(
-        text: 'About the Playground',
-        style: TextStyle(fontWeight: FontWeight.bold),
-        children: <TextSpan>[
-          TextSpan(
-              text:
-                  '\n\nThe Go Playground is a web service that runs on golang.org\'s servers. The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.\n\nIf the program contains tests or examples and no main function, the service runs the tests. Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.\n\nGopher image by Renee French, licensed under (Creative Commons 3.0 Attributions license)[https://creativecommons.org/licenses/by/3.0/].',
-              style: TextStyle(fontWeight: FontWeight.normal))
-        ],
-      ),
-    );
-  }
-
-  void setVisibility(bool visLoc) {
-    setState(() {
-      vis = !visLoc;
-    });
-  }
-
   void makeRequest(String sender, String value) {
     if (value != '') {
       buttonUse = false;
@@ -214,6 +190,9 @@ class _MyApp extends State<MyApp> {
           break;
         case 'format':
           formatPostRequest(value);
+          break;
+        case 'about':
+          updateText(aboutText, '', 'output');
           break;
         case 'share':
           sharePostRequest(value);
