@@ -25,6 +25,7 @@ dependencies:
   cupertino_icons: ^0.1.2
 
   # HTTP Package for requests
+  # dio: "3.0.9"
   http: ^0.12.0+4
 
 dev_dependencies:

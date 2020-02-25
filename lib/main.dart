@@ -181,11 +181,13 @@ class _MyApp extends State<MyApp> {
 
   void makeRequest(String sender, String value) {
     // Hide keyboard on button press
-
     FocusScope.of(context).unfocus();
-    updateText(null, null, 'load');
+
     if (value != '') {
       buttonUse = false;
+      // Display loading text
+      updateText(null, null, 'load');
+
       rsp = null;
       // Button invoked
       switch (sender) {
@@ -216,7 +218,7 @@ class _MyApp extends State<MyApp> {
       Response response = await post(
           'https://play.golang.org/compile?version=2&body=' +
               Uri.encodeFull(code) +
-              '&withVet=true');
+              '&withVet=true'); // FIX POST REQUEST CUTOFF
 
       // check the status code for the result
       int statusCode = response.statusCode;
@@ -286,20 +288,26 @@ class _MyApp extends State<MyApp> {
 
   void updateText(String rsp, String fT, String loc) {
     setState(() {
-      if (loc == 'input') {
-        if (rsp != null) {
-          codeText = rsp;
-        }
-        sysText = fT;
-        returnText = '';
-      } else if (loc == 'output') {
-        if (rsp != null) {
-          returnText = rsp;
-        }
-        sysText = fT;
-      } else if (loc == 'load') {
-        returnText = 'Waiting for remote server...';
-        sysText = '';
+      switch (loc) {
+        case 'input':
+          if (rsp != null) {
+            codeText = rsp;
+          }
+          sysText = fT;
+          returnText = '';
+          break;
+        case 'output':
+          if (rsp != null) {
+            returnText = rsp;
+          }
+          sysText = fT;
+          break;
+        case 'load':
+          returnText = 'Waiting for remote server...';
+          sysText = '';
+          break;
+        default:
+          break;
       }
       buttonUse = true;
     });
