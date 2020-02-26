@@ -232,7 +232,12 @@ class Playground extends State<MyApp> {
 
         if (map['Errors'] == '') {
           rsp = map['Events'][0]['Message'];
-          sysText = '\nProgram exited.';
+          if (map['VetErrors'] == null) {
+            sysText = '\nProgram exited.';
+          }
+          else {
+            sysText = map['VetErrors'];
+          }
         } else {
           rsp = map['Errors'];
           sysText = '\nGo build failed.';
@@ -290,7 +295,7 @@ class Playground extends State<MyApp> {
       rsp = 'Network error occurred.\n';
       sysText = '\n' + e.toString();
     }
-    updateText(rsp, sysText, 'output');
+    updateText(rsp, '\n' + sysText, 'output');
   }
 
   void updateText(String rsp, String fT, String loc) {
