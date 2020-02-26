@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-// import 'package:share/share.dart';
+import 'package:share/share.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 
@@ -138,7 +137,6 @@ class Playground extends State<MyApp> {
   }
 
   // TOUCHABLE ICONS //
-
   GestureDetector aboutIcon() {
     return GestureDetector(
         onTap: () {
@@ -286,11 +284,9 @@ class Playground extends State<MyApp> {
       if (statusCode == 200) {
         sysText = 'https://play.golang.org/p/' + response.body;
       }
-      // Copy rsp to keyboard
-      rsp = 'Copied to clipboard\n';
-      Clipboard.setData(new ClipboardData(text: sysText));
+      rsp = 'Play.Golang.Org Link\n';
       // Share link options
-      // Share.share('Go check out my Go code at ' + sysText, subject: 'Go code share link!');
+      Share.share('Go check out my Go code at ' + sysText, subject: 'Go code share link!');
     } on Exception catch (e) {
       rsp = 'Network error occurred.\n';
       sysText = '\n' + e.toString();
