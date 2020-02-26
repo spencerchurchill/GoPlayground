@@ -7,10 +7,10 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   @override
-  _MyApp createState() => new _MyApp();
+  Playground createState() => new Playground();
 }
 
-class _MyApp extends State<MyApp> {
+class Playground extends State<MyApp> {
   // Text in code input TextFormField
   String codeText =
       'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Hello, playground")\n}\n';
@@ -215,10 +215,12 @@ class _MyApp extends State<MyApp> {
   Future runPostRequest(String code) async {
     // make POST request
     try {
-      Response response = await post(
-          'https://play.golang.org/compile?version=2&body=' +
-              Uri.encodeFull(code) +
-              '&withVet=true'); // FIX POST REQUEST CUTOFF
+      String url = 'https://play.golang.org/compile';
+      Response response = await post(url, body: {
+        'version': '2',
+        'body': code,
+        'withVet': 'true',
+      }); // FIX POST REQUEST CUTOFF
 
       // check the status code for the result
       int statusCode = response.statusCode;
@@ -246,9 +248,12 @@ class _MyApp extends State<MyApp> {
   Future formatPostRequest(String code) async {
     String placement;
     try {
-      Response response = await post('https://play.golang.org/fmt?body=' +
-          Uri.encodeFull(code) +
-          '&imports=true');
+      String url = 'https://play.golang.org/fmt';
+      Response response = await post(url, body: {
+        'body': code,
+        'imports': 'true',
+      });
+
       int statusCode = response.statusCode;
       if (statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.body);
@@ -270,8 +275,9 @@ class _MyApp extends State<MyApp> {
 
   Future sharePostRequest(String code) async {
     try {
-      Response response =
-          await post('https://play.golang.org/share?' + Uri.encodeFull(code));
+      String url = 'https://play.golang.org/share';
+      Response response = await post(url, body: code);
+
       int statusCode = response.statusCode;
       if (statusCode == 200) {
         sysText = 'https://play.golang.org/p/' + response.body;
