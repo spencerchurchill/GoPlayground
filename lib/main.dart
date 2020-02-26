@@ -29,8 +29,7 @@ class Playground extends State<MyApp> {
       'The Go Playground is a web service that runs on golang.org\'s servers.' +
           'The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.' +
           '\n\nIf the program contains tests or examples and no main function, the service runs the tests.' +
-          'Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.' +
-          '\n\nGopher image by Renee French, licensed under (Creative Commons 3.0 Attributions license)[https://creativecommons.org/licenses/by/3.0/].';
+          'Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.';
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +43,7 @@ class Playground extends State<MyApp> {
           expandedHeight: 150.0,
           flexibleSpace: FlexibleSpaceBar(
               background: FittedBox(
-            child: Image.asset('assets/images/gophers.jpg'),
+            child: Image.asset('assets/images/gophers.png'),
             fit: BoxFit.fill,
           )),
           actions: <Widget>[
@@ -222,7 +221,7 @@ class Playground extends State<MyApp> {
         'version': '2',
         'body': code,
         'withVet': 'true',
-      }); // FIX POST REQUEST CUTOFF
+      });
 
       // check the status code for the result
       int statusCode = response.statusCode;
