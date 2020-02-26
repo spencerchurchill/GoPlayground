@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+// import 'package:share/share.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 
@@ -34,7 +35,7 @@ class Playground extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    codeInput.text = '$codeText';
+    codeInput.text = codeText;
     return new MaterialApp(
       title: 'Go Playground',
       home: new Scaffold(
@@ -89,8 +90,8 @@ class Playground extends State<MyApp> {
     ]);
   }
 
-  TextFormField codeTextBox() {
-    return new TextFormField(
+  TextField codeTextBox() {
+    return new TextField(
       controller: codeInput,
       toolbarOptions: ToolbarOptions(
         copy: true,
@@ -118,12 +119,12 @@ class Playground extends State<MyApp> {
           children: <Widget>[
             SelectableText(
               // Go output
-              '$returnText',
+              returnText,
               style: codeStyle(),
             ),
             SelectableText(
               // Go output
-              '$sysText',
+              sysText,
               style: TextStyle(color: Colors.grey),
             ),
           ],
@@ -192,7 +193,6 @@ class Playground extends State<MyApp> {
       // Display loading text
       updateText(null, null, 'load');
 
-      rsp = null;
       // Button invoked
       switch (sender) {
         case 'run':
@@ -289,6 +289,8 @@ class Playground extends State<MyApp> {
       // Copy rsp to keyboard
       rsp = 'Copied to clipboard\n';
       Clipboard.setData(new ClipboardData(text: sysText));
+      // Share link options
+      // Share.share('Go check out my Go code at ' + sysText, subject: 'Go code share link!');
     } on Exception catch (e) {
       rsp = 'Network error occurred.\n';
       sysText = '\n' + e.toString();
@@ -301,7 +303,7 @@ class Playground extends State<MyApp> {
       switch (loc) {
         case 'input':
           if (rsp != null) {
-            codeInput.text = rsp;
+            codeText = rsp;
           }
           sysText = fT;
           returnText = '';
