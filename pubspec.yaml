@@ -11,7 +11,7 @@ description: Code Go on the go.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+6
+version: 1.0.1
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -32,7 +32,7 @@ dev_dependencies:
     sdk: flutter
 
   # Easy CLI tool to generate IOS and Android app icons
-  flutter_launcher_icons: "^0.7.3"
+  flutter_launcher_icons: ^0.7.3
 
 flutter_icons:
   android: true
@@ -51,7 +51,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - "assets/images/gophers.jpg"
+    - assets/images/gophers.jpg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see
