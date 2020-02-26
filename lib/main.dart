@@ -26,7 +26,11 @@ class Playground extends State<MyApp> {
   final TextEditingController codeInput = new TextEditingController();
   // About the Go Playground text
   final String aboutText =
-      'The Go Playground is a web service that runs on golang.org\'s servers. The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.\n\nIf the program contains tests or examples and no main function, the service runs the tests. Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.\n\nGopher image by Renee French, licensed under (Creative Commons 3.0 Attributions license)[https://creativecommons.org/licenses/by/3.0/].';
+      'The Go Playground is a web service that runs on golang.org\'s servers.' +
+          'The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.' +
+          '\n\nIf the program contains tests or examples and no main function, the service runs the tests.' +
+          'Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.' +
+          '\n\nGopher image by Renee French, licensed under (Creative Commons 3.0 Attributions license)[https://creativecommons.org/licenses/by/3.0/].';
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +301,7 @@ class Playground extends State<MyApp> {
       switch (loc) {
         case 'input':
           if (rsp != null) {
-            codeText = rsp;
+            codeInput.text = rsp;
           }
           sysText = fT;
           returnText = '';
