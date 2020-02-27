@@ -234,7 +234,7 @@ class Playground extends State<MyApp> {
         'version': '2',
         'body': code,
         'withVet': 'true',
-      });
+      }).timeout(Duration(seconds: 10));
 
       // check the status code for the result
       int statusCode = response.statusCode;
@@ -272,8 +272,7 @@ class Playground extends State<MyApp> {
       Response response = await post(url, body: {
         'body': code,
         'imports': 'true',
-      });
-
+      }).timeout(Duration(seconds: 10));
       int statusCode = response.statusCode;
       if (statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.body);
@@ -295,8 +294,8 @@ class Playground extends State<MyApp> {
   Future sharePostRequest(String code) async {
     try {
       String url = 'https://play.golang.org/share';
-      Response response = await post(url, body: code);
-
+      Response response =
+          await post(url, body: code).timeout(Duration(seconds: 10));
       int statusCode = response.statusCode;
       if (statusCode == 200) {
         sysText = 'https://play.golang.org/p/' + response.body + '.go';
