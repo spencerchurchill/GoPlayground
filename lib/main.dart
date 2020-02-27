@@ -43,12 +43,13 @@ class Playground extends State<MyApp> {
           // SliverAppBar
           body: CustomScrollView(slivers: <Widget>[
         SliverAppBar(
-          expandedHeight: 150.0,
+          expandedHeight: 128.0,
           flexibleSpace: FlexibleSpaceBar(
-              background: FittedBox(
-            child: Image.asset('assets/images/gophers.png'),
-            // fit: BoxFit.fill,
-          )),
+              background: SafeArea(
+                              child: Image.asset(
+            'assets/images/gophers.png',
+          ),
+              )),
           actions: <Widget>[
             Tooltip(message: 'About', child: aboutIcon()),
           ],
