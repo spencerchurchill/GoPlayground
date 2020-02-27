@@ -24,12 +24,15 @@ class Playground extends State<MyApp> {
   bool buttonUse = true;
   // Controller to validate and edit text in code input TextFormField
   final TextEditingController codeInput = new TextEditingController();
+  // Theme variable
+  bool themeBool = true;
   // About the Go Playground text
   final String aboutText =
       'The Go Playground is a web service that runs on golang.org\'s servers.' +
-          'The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.' +
+          ' The service receives a Go program, vets, compiles, links, and runs the program inside a sandbox, then returns the output.' +
           '\n\nIf the program contains tests or examples and no main function, the service runs the tests.' +
-          'Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.';
+          ' Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.' +
+          '\n\nPress and hold the info button to change themes.';
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +60,7 @@ class Playground extends State<MyApp> {
         ),
         SliverList(delegate: goBody()),
       ])),
-      theme: new ThemeData.dark(),
+      theme: themeBool ? new ThemeData.dark() : new ThemeData.light(),
     );
   }
 
@@ -141,7 +144,15 @@ class Playground extends State<MyApp> {
         onTap: () {
           makeRequest('about', aboutText);
         },
-        child: Icon(Icons.info_outline));
+        onLongPress: () {
+          setState(() {
+            themeBool = !themeBool;
+          });
+        },
+        child: Icon(
+          Icons.info_outline,
+          color: Colors.black,
+        ));
   }
 
   GestureDetector runIcon() {
@@ -182,6 +193,8 @@ class Playground extends State<MyApp> {
   }
 
   void makeRequest(String sender, String value) {
+    // Clear rsp
+    rsp = null;
     // Hide keyboard on button press
     FocusScope.of(context).unfocus();
 
@@ -212,7 +225,7 @@ class Playground extends State<MyApp> {
     }
   }
 
-// POST REQUESTS //
+  // POST REQUESTS //
   Future runPostRequest(String code) async {
     // make POST request
     try {
@@ -230,22 +243,23 @@ class Playground extends State<MyApp> {
       if (statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.body);
 
-        if (map['Errors'] == '') {
+        if (map['Errors'] == '' && map['Events'] != null) {
           rsp = map['Events'][0]['Message'];
           if (map['VetErrors'] == null) {
-            sysText = '\nProgram exited.';
-          }
-          else {
+            sysText = 'Program exited.';
+          } else {
             sysText = map['VetErrors'];
           }
+        } else if (map['Events'] == null) {
+          rsp = '';
+          sysText = 'Program exited.';
         } else {
           rsp = map['Errors'];
-          sysText = '\nGo build failed.';
+          sysText = 'Go build failed.';
         }
       }
     } on Exception catch (e) {
-      rsp = 'Network error occurred.\n';
-      sysText = '\n' + e.toString();
+      neterr(e);
     }
     // Update output textfield
     updateText(rsp, sysText, 'output');
@@ -271,8 +285,7 @@ class Playground extends State<MyApp> {
         placement = 'input';
       }
     } on Exception catch (e) {
-      rsp = 'Network error occurred.\n';
-      sysText = '\n' + e.toString();
+      neterr(e);
       placement = 'output';
     }
     // Update code textfield
@@ -286,16 +299,21 @@ class Playground extends State<MyApp> {
 
       int statusCode = response.statusCode;
       if (statusCode == 200) {
-        sysText = 'https://play.golang.org/p/' + response.body;
+        sysText = 'https://play.golang.org/p/' + response.body + '.go';
       }
       rsp = 'Play.Golang.Org Link\n';
       // Share link options
-      Share.share('Go check out my Go code at ' + sysText, subject: 'Go code share link!');
+      Share.share('Go check out my Go code at ' + sysText,
+          subject: 'Go code share link!');
     } on Exception catch (e) {
-      rsp = 'Network error occurred.\n';
-      sysText = '\n' + e.toString();
+      neterr(e);
     }
-    updateText(rsp, '\n' + sysText, 'output');
+    updateText(rsp, sysText, 'output');
+  }
+
+  void neterr(Exception e) {
+    rsp = 'Network error occurred.\n';
+    sysText = e.toString();
   }
 
   void updateText(String rsp, String fT, String loc) {
@@ -305,14 +323,14 @@ class Playground extends State<MyApp> {
           if (rsp != null) {
             codeText = rsp;
           }
-          sysText = fT;
+          sysText = '\n' + fT;
           returnText = '';
           break;
         case 'output':
           if (rsp != null) {
             returnText = rsp;
           }
-          sysText = fT;
+          sysText = '\n' + fT;
           break;
         case 'load':
           returnText = 'Waiting for remote server...';
