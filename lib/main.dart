@@ -143,7 +143,10 @@ class Playground extends State<MyApp> {
             themeBool = !themeBool;
           });
         },
-        child: Icon(Icons.info_outline));
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Icon(Icons.info_outline),
+        ));
   }
 
   GestureDetector runIcon() {
