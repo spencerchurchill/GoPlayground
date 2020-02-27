@@ -47,7 +47,7 @@ class Playground extends State<MyApp> {
           flexibleSpace: FlexibleSpaceBar(
               background: FittedBox(
             child: Image.asset('assets/images/gophers.png'),
-            fit: BoxFit.fill,
+            // fit: BoxFit.fill,
           )),
           actions: <Widget>[
             Tooltip(message: 'About', child: aboutIcon()),
@@ -149,10 +149,7 @@ class Playground extends State<MyApp> {
             themeBool = !themeBool;
           });
         },
-        child: Icon(
-          Icons.info_outline,
-          color: Colors.black,
-        ));
+        child: Icon(Icons.info_outline));
   }
 
   GestureDetector runIcon() {
