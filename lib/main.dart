@@ -17,7 +17,7 @@ class Playground extends State<MyApp> {
   // Text returned from Go program
   String returnText = '';
   // Additional text returned from server
-  String sysText = '';
+  String sysText = '\n';
   // POST response text
   String rsp = '';
   // Disable button function while POST request awaits
