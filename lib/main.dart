@@ -11,21 +11,6 @@ class MyApp extends StatefulWidget {
 }
 
 class Playground extends State<MyApp> {
-  // Text in code input TextFormField
-  String codeText =
-      'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Hello, playground")\n}\n';
-  // Text returned from Go program
-  String returnText = '';
-  // Additional text returned from server
-  String sysText = '\n';
-  // POST response text
-  String rsp = '';
-  // Disable button function while POST request awaits
-  bool buttonUse = true;
-  // Controller to validate and edit text in code input TextFormField
-  final TextEditingController codeInput = new TextEditingController();
-  // Theme variable
-  bool themeBool = true;
   // About the Go Playground text
   final String aboutText =
       'The Go Playground is a web service that runs on golang.org\'s servers.' +
@@ -33,6 +18,19 @@ class Playground extends State<MyApp> {
           '\n\nIf the program contains tests or examples and no main function, the service runs the tests.' +
           ' Benchmarks will likely not be supported since the program runs in a sandboxed environment with limited resources.' +
           '\n\nPress and hold the info button to change themes.';
+  // Theme variable
+  bool themeBool = true;
+  // Disable button function while POST request awaits
+  bool buttonUse = true;
+  // Text in code input TextFormField
+  String codeText =
+      'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Hello, playground")\n}\n';
+  // Controller to validate and edit text in code input TextFormField
+  final TextEditingController codeInput = new TextEditingController();
+  // Text returned from Go program
+  String returnText = '';
+  // Additional text returned from server
+  String sysText = '\n';
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +44,9 @@ class Playground extends State<MyApp> {
           expandedHeight: 128.0,
           flexibleSpace: FlexibleSpaceBar(
               background: SafeArea(
-                              child: Image.asset(
-            'assets/images/gophers.png',
-          ),
-              )),
-          actions: <Widget>[
-            Tooltip(message: 'About', child: aboutIcon()),
-          ],
+            child: Image.asset('assets/images/gophers.png'),
+          )),
+          actions: <Widget>[aboutIcon()],
           bottom: PreferredSize(
               preferredSize: Size.fromHeight(40.0), child: goBar()),
           pinned: true,
@@ -103,7 +97,6 @@ class Playground extends State<MyApp> {
       ),
       keyboardType: TextInputType.multiline,
       autocorrect: false,
-      minLines: 10,
       maxLines: null,
       style: codeStyle(),
       onChanged: (text) {
@@ -159,7 +152,6 @@ class Playground extends State<MyApp> {
           if (buttonUse) {
             makeRequest('run', codeInput.text);
           }
-          return null;
         },
         child: Icon(Icons.play_circle_outline, color: Colors.green));
   }
@@ -170,7 +162,6 @@ class Playground extends State<MyApp> {
           if (buttonUse) {
             makeRequest('format', codeInput.text);
           }
-          return null;
         },
         child: Icon(
           Icons.text_format,
@@ -183,7 +174,6 @@ class Playground extends State<MyApp> {
           if (buttonUse) {
             makeRequest('share', codeInput.text);
           }
-          return null;
         },
         child: Icon(
           Icons.share,
@@ -191,8 +181,6 @@ class Playground extends State<MyApp> {
   }
 
   void makeRequest(String sender, String value) {
-    // Clear rsp
-    rsp = null;
     // Hide keyboard on button press
     FocusScope.of(context).unfocus();
 
@@ -225,6 +213,7 @@ class Playground extends State<MyApp> {
 
   // POST REQUESTS //
   Future runPostRequest(String code) async {
+    String rsp;
     // make POST request
     try {
       String url = 'https://play.golang.org/compile';
@@ -257,13 +246,15 @@ class Playground extends State<MyApp> {
         }
       }
     } on Exception catch (e) {
-      neterr(e);
+      rsp = 'Network error occurred.\n';
+      sysText = e.toString();
     }
     // Update output textfield
     updateText(rsp, sysText, 'output');
   }
 
   Future formatPostRequest(String code) async {
+    String rsp;
     String placement;
     try {
       String url = 'https://play.golang.org/fmt';
@@ -282,7 +273,8 @@ class Playground extends State<MyApp> {
         placement = 'input';
       }
     } on Exception catch (e) {
-      neterr(e);
+      rsp = 'Network error occurred.\n';
+      sysText = e.toString();
       placement = 'output';
     }
     // Update code textfield
@@ -290,6 +282,7 @@ class Playground extends State<MyApp> {
   }
 
   Future sharePostRequest(String code) async {
+    String rsp;
     try {
       String url = 'https://play.golang.org/share';
       Response response =
@@ -303,14 +296,10 @@ class Playground extends State<MyApp> {
       Share.share('Go check out my Go code at ' + sysText,
           subject: 'Go code share link!');
     } on Exception catch (e) {
-      neterr(e);
+      rsp = 'Network error occurred.\n';
+      sysText = e.toString();
     }
     updateText(rsp, sysText, 'output');
-  }
-
-  void neterr(Exception e) {
-    rsp = 'Network error occurred.\n';
-    sysText = e.toString();
   }
 
   void updateText(String rsp, String fT, String loc) {
