@@ -27,6 +27,10 @@ class Playground extends State<MyApp> {
       'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Hello, playground")\n}\n';
   // Controller to validate and edit text in code input TextFormField
   final TextEditingController codeInput = new TextEditingController();
+  // Timeout in seconds
+  int timeOut = 10;
+  // POST response string
+  String rsp = '';
   // Text returned from Go program
   String returnText = '';
   // Additional text returned from server
@@ -216,7 +220,6 @@ class Playground extends State<MyApp> {
 
   // POST REQUESTS //
   Future runPostRequest(String code) async {
-    String rsp;
     // make POST request
     try {
       String url = 'https://play.golang.org/compile';
@@ -224,7 +227,7 @@ class Playground extends State<MyApp> {
         'version': '2',
         'body': code,
         'withVet': 'true',
-      }).timeout(Duration(seconds: 10));
+      }).timeout(Duration(seconds: timeOut));
 
       // check the status code for the result
       int statusCode = response.statusCode;
@@ -235,12 +238,9 @@ class Playground extends State<MyApp> {
 
         if (map['Errors'] == '' && map['Events'] != null) {
           rsp = map['Events'][0]['Message'];
-          if (map['VetErrors'] == null) {
-            sysText = 'Program exited.';
-          } else {
-            sysText = map['VetErrors'];
-          }
-        } else if (map['Events'] == null) {
+          sysText =
+              map['VetErrors'] == null ? 'Program exited.' : map['VetErrors'];
+        } else if (map['Events'] == null && map['Errors'] == null) {
           rsp = '';
           sysText = 'Program exited.';
         } else {
@@ -249,22 +249,20 @@ class Playground extends State<MyApp> {
         }
       }
     } on Exception catch (e) {
-      rsp = 'Network error occurred.\n';
-      sysText = e.toString();
+      networkFail(e);
     }
     // Update output textfield
     updateText(rsp, sysText, 'output');
   }
 
   Future formatPostRequest(String code) async {
-    String rsp;
     String placement;
     try {
       String url = 'https://play.golang.org/fmt';
       Response response = await post(url, body: {
         'body': code,
         'imports': 'true',
-      }).timeout(Duration(seconds: 10));
+      }).timeout(Duration(seconds: timeOut));
       int statusCode = response.statusCode;
       if (statusCode == 200) {
         Map<String, dynamic> map = jsonDecode(response.body);
@@ -276,8 +274,7 @@ class Playground extends State<MyApp> {
         placement = 'input';
       }
     } on Exception catch (e) {
-      rsp = 'Network error occurred.\n';
-      sysText = e.toString();
+      networkFail(e);
       placement = 'output';
     }
     // Update code textfield
@@ -285,24 +282,27 @@ class Playground extends State<MyApp> {
   }
 
   Future sharePostRequest(String code) async {
-    String rsp;
     try {
       String url = 'https://play.golang.org/share';
       Response response =
-          await post(url, body: code).timeout(Duration(seconds: 10));
+          await post(url, body: code).timeout(Duration(seconds: timeOut));
       int statusCode = response.statusCode;
       if (statusCode == 200) {
         sysText = 'https://play.golang.org/p/' + response.body + '.go';
       }
-      rsp = 'Play.Golang.Org Link\n';
+      rsp = 'Go Code URL\n';
       // Share link options
       Share.share('Go check out my Go code at ' + sysText,
           subject: 'Go code share link!');
     } on Exception catch (e) {
-      rsp = 'Network error occurred.\n';
-      sysText = e.toString();
+      networkFail(e);
     }
     updateText(rsp, sysText, 'output');
+  }
+
+  void networkFail(Exception e) {
+    rsp = 'Network error occurred.\n';
+    sysText = e.toString();
   }
 
   void updateText(String rsp, String fT, String loc) {
@@ -312,8 +312,8 @@ class Playground extends State<MyApp> {
           if (rsp != null) {
             codeText = rsp;
           }
-          sysText = '\n' + fT;
           returnText = '';
+          sysText = '\n' + fT;
           break;
         case 'output':
           if (rsp != null) {
